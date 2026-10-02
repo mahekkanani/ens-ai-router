@@ -3,7 +3,7 @@
  *
  * HTTP contract for specialist agent servers.
  *
- * All three agents (invoice, contract, brand) expose the same HTTP interface:
+ * All specialist agents expose the same HTTP interface:
  *   POST /ask
  *   Request:  { request: string }
  *   Response: { answer: string }

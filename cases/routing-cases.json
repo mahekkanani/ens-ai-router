@@ -1,0 +1,62 @@
+[
+  {
+    "request": "Why is my invoice overdue?",
+    "expectedAgent": "invoices.priya.eth",
+    "category": "billing"
+  },
+  {
+    "request": "I need to check my payment status for last month's bill",
+    "expectedAgent": "invoices.priya.eth",
+    "category": "billing"
+  },
+  {
+    "request": "How do I request a refund for a duplicate charge?",
+    "expectedAgent": "invoices.priya.eth",
+    "category": "billing"
+  },
+  {
+    "request": "What is a termination clause in my contract?",
+    "expectedAgent": "contracts.priya.eth",
+    "category": "legal"
+  },
+  {
+    "request": "Can you explain the notice period requirements in our agreement?",
+    "expectedAgent": "contracts.priya.eth",
+    "category": "legal"
+  },
+  {
+    "request": "What are my obligations under Section 4 of the service contract?",
+    "expectedAgent": "contracts.priya.eth",
+    "category": "legal"
+  },
+  {
+    "request": "Write a tagline for an AI routing product",
+    "expectedAgent": "brand.priya.eth",
+    "category": "marketing"
+  },
+  {
+    "request": "Create a product description for a developer tool that helps with API integration",
+    "expectedAgent": "brand.priya.eth",
+    "category": "marketing"
+  },
+  {
+    "request": "Generate three social media posts announcing our new feature launch",
+    "expectedAgent": "brand.priya.eth",
+    "category": "marketing"
+  },
+  {
+    "request": "What is the capital of France?",
+    "expectedAgent": null,
+    "category": "general_knowledge"
+  },
+  {
+    "request": "Calculate the square root of 144",
+    "expectedAgent": null,
+    "category": "math"
+  },
+  {
+    "request": "Tell me a joke about programming",
+    "expectedAgent": null,
+    "category": "entertainment"
+  }
+]

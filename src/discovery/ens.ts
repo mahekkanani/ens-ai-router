@@ -5,8 +5,8 @@
  *
  * Discovery flow:
  *   1. Read `agent:index` text record from the registry ENS name
- *      (e.g. "registry.priya.eth"). The value is a comma-separated
- *      list of agent ENS names — e.g. "invoices.priya.eth,contracts.priya.eth".
+ *      (e.g. "registry.example.eth"). The value is a comma-separated
+ *      list of agent ENS names — e.g. "agent-a.example.eth,agent-b.example.eth".
  *
  *   2. For each agent ENS name, read its four text records in parallel:
  *        agent:description, agent:endpoint, agent:input, agent:version

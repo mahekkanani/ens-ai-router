@@ -98,10 +98,13 @@ export function buildApp(): FastifyInstance {
         // Map timeout to 504 Gateway Timeout, others to 502 Bad Gateway
         const statusCode = forwardResult.code === "timeout" ? 504 : 502;
 
+        // Log the verbose error internally to avoid leaking raw downstream text to clients
+        app.log.error(`Downstream failure: ${forwardResult.error}`);
+
         return reply.code(statusCode).send({
           status: "error",
           code: forwardResult.code,
-          message: `Downstream agent error: ${forwardResult.error}`,
+          message: "The downstream agent encountered an error processing the request.",
         });
       }
 

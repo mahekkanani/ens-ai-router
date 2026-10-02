@@ -171,7 +171,7 @@ describe("Central Fastify Router Loop POST /route", () => {
     const json = response.json();
     expect(json.status).toBe("error");
     expect(json.code).toBe("timeout");
-    expect(json.message).toContain("Downstream agent error: Request timed out");
+    expect(json.message).toBe("The downstream agent encountered an error processing the request.");
   });
 
   // ─── 6. Invalid Endpoint Rejected Before Forwarding ───

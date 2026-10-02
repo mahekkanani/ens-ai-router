@@ -133,6 +133,8 @@ export async function forwardToAgent(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
+      // Prevent SSRF via malicious redirects
+      redirect: "error",
       // TEST #5 (7 points): EXPLICIT TIMEOUT
       // AbortSignal.timeout() is the explicit mechanism visible in source
       signal: AbortSignal.timeout(FORWARD_TIMEOUT_MS),

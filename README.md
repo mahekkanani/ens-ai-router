@@ -215,6 +215,54 @@ This is tested in `tests/discovery-integration.test.ts` (see "discovers a fourth
 
 ---
 
+## Final Demo Checklist
+
+To run an end-to-end demo proving all Hackathon checks:
+
+**Preparation:**
+```bash
+# 1. Start all 3 mocked downstream agents
+bash scripts/start-all-agents.sh
+
+# 2. In another terminal, start the central router
+npm run dev src/index.ts
+```
+
+**Demo 1: Invoice specialist**
+```bash
+curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Why is my invoice overdue?"}'
+# Asserts attribution back to "invoices.priya.eth"
+```
+
+**Demo 2: Contract specialist**
+```bash
+curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Explain the termination clause."}'
+# Asserts attribution back to "contracts.priya.eth"
+```
+
+**Demo 3: Brand specialist**
+```bash
+curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Make a tagline for our AI product."}'
+# Asserts attribution back to "brand.priya.eth"
+```
+
+**Demo 4: Explicit no-agent constraint**
+```bash
+curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "What is the capital of France?"}'
+# Asserts status "no_suitable_agent" (proving no fallback or bypass)
+```
+
+**Demo 5: Zero-code fourth agent discovery**
+*(Manually requires adding `legal.priya.eth` to the Sepolia Text Record of the configured `ENS_REGISTRY_NAME`)*
+
+Once the blockchain propagates, run:
+```bash
+curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Can you advise on compliance laws?"}'
+# The router automatically discovers, queries, and forwards to the new agent without restarting the Node.js server.
+```
+
+---
+
 ## Security Notes
 
 - All ENS records are treated as untrusted input and validated with Zod

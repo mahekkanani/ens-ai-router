@@ -604,4 +604,3 @@ The central router is currently intended to run locally for the hackathon demo. 
 ## License
 
 ISC
-🤖 Generated with [Claude Code](https://claude.com/claude-code)

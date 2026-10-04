@@ -14,13 +14,13 @@ Built for a 48-hour hackathon. The critical feature: **adding a new specialist a
 User Request
     ↓
 [ENS Discovery]
-    Read registry.priya.eth → agent:index → "invoices.priya.eth,contracts.priya.eth,brand.priya.eth"
+    Read registry mkagent.eth → agent:index → "invoice.mkagent.eth,contract.mkagent.eth,brand.mkagent.eth"
     For each agent: read agent:description, agent:endpoint, agent:input, agent:version
     Validate with Zod.safeParse() → skip malformed, continue discovery
     ↓
 [LLM Routing]
     Send {agents: [{id, description}], userRequest} to LLM
-    LLM returns {agent: "invoices.priya.eth" | null}
+    LLM returns {agent: "invoice.mkagent.eth" | null}
     ↓
 [Validation & Forwarding]
     Verify LLM choice exists in discovered agents (membership check)
@@ -121,9 +121,10 @@ SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
 LLM_API_KEY=sk-...
 LLM_BASE_URL=https://api.openai.com/v1
 LLM_MODEL=gpt-4o-mini
+# No real keys, private keys, or .env contents are published in this repo.
 
 # ENS registry name (whose agent:index lists all agents)
-ENS_REGISTRY_NAME=registry.priya.eth
+ENS_REGISTRY_NAME=mkagent.eth
 
 # HTTP server port
 PORT=3000
@@ -151,19 +152,26 @@ The router requires a two-level ENS hierarchy:
 
 ### Level 1: Registry
 
-**ENS name:** `registry.priya.eth` (or your configured `ENS_REGISTRY_NAME`)
+**ENS name:** `mkagent.eth` (actual root; configured via `ENS_REGISTRY_NAME`)
 
 Set one text record:
 - Key: `agent:index`
-- Value: `invoices.priya.eth,contracts.priya.eth,brand.priya.eth`
+- Value: `invoice.mkagent.eth,contract.mkagent.eth,brand.mkagent.eth`
 
 ### Level 2: Individual Agents
 
 For each agent listed in the index, set four text records:
 
-**Example: `invoices.priya.eth`**
+**Actual agent ENS names:** `invoice.mkagent.eth`, `contract.mkagent.eth`, `brand.mkagent.eth`
+
+**Actual public HTTPS endpoints:**
+- `https://invoice-agent-6fdu.onrender.com/ask`
+- `https://contract-agent-mxu6.onrender.com/ask`
+- `https://brand-agent-h2zm.onrender.com/ask`
+
+For each agent, example records (`invoice.mkagent.eth` shown):
 - `agent:description` → `"Handles invoice, billing, and payment questions"`
-- `agent:endpoint` → `"https://invoice-agent.example.com/ask"`
+- `agent:endpoint` → `"https://invoice-agent-6fdu.onrender.com/ask"`
 - `agent:input` → `"Plain text question about an invoice or payment"`
 - `agent:version` → `"1.0.0"`
 
@@ -204,9 +212,12 @@ npm test              # 31 tests across 3 files, all passing
 
 This is the centerpiece of the hackathon demo:
 
-1. **Register a new ENS name on Sepolia** (e.g. `legal.priya.eth`)
+1. **Register a new ENS name on Sepolia** (e.g. `legal.mkagent.eth`)
 2. **Set its four `agent:*` text records** (description, endpoint, input, version)
-3. **Edit `registry.priya.eth`'s `agent:index` record** to append `legal.priya.eth`
+3. **Edit `mkagent.eth`'s `agent:index` record** to append `legal.mkagent.eth`
+4. **Send a request to the router** relevant to the new agent
+
+The router discovers the new agent on the next request — **no source code changes, no redeployment.** Only ENS record updates are needed.
 4. **Send a request to the router** relevant to the new agent
 
 The router discovers the new agent on the next request — **no source code changes, no redeployment.**
@@ -231,19 +242,19 @@ npm run dev src/index.ts
 **Demo 1: Invoice specialist**
 ```bash
 curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Why is my invoice overdue?"}'
-# Asserts attribution back to "invoices.priya.eth"
+# Asserts attribution back to "invoice.mkagent.eth"
 ```
 
 **Demo 2: Contract specialist**
 ```bash
 curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Explain the termination clause."}'
-# Asserts attribution back to "contracts.priya.eth"
+# Asserts attribution back to "contract.mkagent.eth"
 ```
 
 **Demo 3: Brand specialist**
 ```bash
 curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d '{"request": "Make a tagline for our AI product."}'
-# Asserts attribution back to "brand.priya.eth"
+# Asserts attribution back to "brand.mkagent.eth"
 ```
 
 **Demo 4: Explicit no-agent constraint**
@@ -253,7 +264,7 @@ curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d 
 ```
 
 **Demo 5: Zero-code fourth agent discovery**
-*(Manually requires adding `legal.priya.eth` to the Sepolia Text Record of the configured `ENS_REGISTRY_NAME`)*
+*(Manually requires adding `legal.mkagent.eth` to the Sepolia Text Record of `mkagent.eth`)*
 
 Once the blockchain propagates, run:
 ```bash
@@ -263,7 +274,27 @@ curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d 
 
 ---
 
-## Security Notes
+## Router Operation
+
+**How it works:**
+1. **ENS discovery** — read `mkagent.eth` `agent:index`; for each subname fetch `agent:description`, `agent:endpoint`, `agent:input`, `agent:version`; validate with Zod.safeParse(); skip malformed records; continue.
+2. **LLM routing** — send only `{id, description}` per discovered agent (never endpoints) plus user request; LLM returns `agent` id or null.
+3. **Membership validation** — LLM-selected id must exist in discovered agents (no arbitrary selection).
+4. **ENS-derived endpoint** — resolve `agent:endpoint` from the discovered agent record.
+5. **HTTPS validation** — endpoint must use HTTPS.
+6. **Explicit forwarding timeout** — request to agent has explicit timeout.
+7. **Forwarding** — POST to agent endpoint.
+8. **Attribution** — response includes responsible agent ENS name.
+9. **No-agent response** — unmatched request returns explicit `no_suitable_agent`; no fallback.
+
+**Explicit design constraints:**
+- No hardcoded agent list in router source.
+- Malformed ENS records are skipped, not fatal.
+- Model output cannot select arbitrary URLs (only ids); endpoint comes from ENS.
+- HTTPS required.
+- Explicit timeout on forward.
+- No-agent response documented.
+- Routing test cases: [`cases/routing-cases.json`](cases/routing-cases.json)
 
 - All ENS records are treated as untrusted input and validated with Zod
 - The LLM receives only `{id, description}` per agent — never endpoint URLs
@@ -273,6 +304,10 @@ curl -X POST http://localhost:3000/route -H "Content-Type: application/json" -d 
 - Downstream responses are validated before returning to the client
 
 ---
+
+## Router Deployment Note
+
+The central router (`npm run dev src/index.ts`) currently runs **locally** unless the repository contains evidence of a hosted deployment (it does not claim one). The specialist agent servers are deployed on Render; the router is started locally to connect to them.
 
 ## License
 
@@ -295,3 +330,4 @@ ISC
 | 9 | No credentials in tracked files | 5 | ✅ Phase 3 |
 
 **Current score: 23/80 automated + 20 human judgment = 43/100**
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -202,7 +202,7 @@ describe("Secure downstream HTTP forwarding", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.code).toBe("timeout");
-        expect(result.error).toContain("timed out after 15000ms");
+        expect(result.error).toContain("timed out after 30000ms");
       }
     });
 

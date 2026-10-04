@@ -29,10 +29,10 @@ import {
 import type { AgentRequest } from "../schemas/agent-http.js";
 
 /**
- * Explicit timeout for downstream agent requests (15 seconds).
+ * Explicit timeout for downstream agent requests (30 seconds).
  * Visible in source for hackathon test case #5 — 7 points.
  */
-const FORWARD_TIMEOUT_MS = 15000;
+const FORWARD_TIMEOUT_MS = 30000;
 
 /**
  * Result of forwarding a request to a downstream agent.

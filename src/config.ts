@@ -22,20 +22,26 @@ function optionalEnv(key: string, fallback: string): string {
 }
 
 export const config = {
-  sepolia: {
-    rpcUrl: requireEnv("SEPOLIA_RPC_URL"),
+  get sepolia() {
+    return {
+      rpcUrl: requireEnv("SEPOLIA_RPC_URL"),
+    };
   },
-  llm: {
-    apiKey: requireEnv("LLM_API_KEY"),
-    baseUrl: optionalEnv("LLM_BASE_URL", "https://api.openai.com/v1"),
-    model: optionalEnv("LLM_MODEL", "gpt-4o-mini"),
+  get llm() {
+    return {
+      apiKey: requireEnv("LLM_API_KEY"),
+      baseUrl: optionalEnv("LLM_BASE_URL", "https://api.openai.com/v1"),
+      model: optionalEnv("LLM_MODEL", "gpt-4o-mini"),
+    };
   },
-  ens: {
-    // The ENS name whose agent:index text record lists all active agent ENS names.
-    // Change this record to add/remove agents — no source code changes required.
-    registryName: optionalEnv("ENS_REGISTRY_NAME", "registry.priya.eth"),
+  get ens() {
+    return {
+      registryName: optionalEnv("ENS_REGISTRY_NAME", "registry.priya.eth"),
+    };
   },
-  server: {
-    port: parseInt(optionalEnv("PORT", "3000"), 10),
+  get server() {
+    return {
+      port: parseInt(optionalEnv("PORT", "3000"), 10),
+    };
   },
 } as const;

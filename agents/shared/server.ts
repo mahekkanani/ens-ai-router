@@ -27,6 +27,7 @@ export interface AgentHandler {
 
 export interface AgentServerConfig {
   name: string;
+  /** Local-development fallback port; overridden by process.env.PORT at runtime. */
   port: number;
   handler: AgentHandler;
 }
@@ -91,9 +92,15 @@ export async function createAgentServer(
     }
   });
 
+  // Honour process.env.PORT (set by Render and similar platforms); fall back to
+  // the per-agent local-dev default (4001 / 4002 / 4003).
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : config.port;
+  // Bind to 0.0.0.0 so the process is reachable on all interfaces when deployed.
+  const host = "0.0.0.0";
+
   // Start server
-  await server.listen({ port: config.port, host: "127.0.0.1" });
-  server.log.info(`${config.name} agent listening on http://127.0.0.1:${config.port}`);
+  await server.listen({ port, host });
+  server.log.info(`${config.name} agent listening on http://${host}:${port}`);
 
   return server;
 }
